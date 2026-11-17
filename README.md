@@ -72,3 +72,5 @@ After a release build, these check that the window repaints after minimize/resto
 ## License
 
 GPL-3.0-only. The embedded Geist fonts are under the SIL Open Font License 1.1 (`assets/fonts/OFL.txt`).
+
+<!-- docs-only CI skip proof, closed unmerged -->
