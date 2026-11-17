@@ -13,13 +13,102 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Docs-only pull requests skip the required jobs below (agentic-instructions
+  # docs/github-actions-maintenance.md, "Docs-only pull requests"). A job
+  # skipped by its `if` reports Success, so branch protection still passes.
+  # Not a required check. GitHub-hosted like the rest: this repository is
+  # public, and the self-hosted pool refuses public repositories.
+  changes:
+    name: Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      code: ${{ steps.classify.outputs.code }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          # The classification reads the PR's commit range.
+          fetch-depth: 0
+
+      - name: Classify changed files
+        id: classify
+        shell: bash
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          # Only a pull request can be docs-only.
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            echo "Event ${GITHUB_EVENT_NAME}: running everything."
+            echo "code=true" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          # Documentation is Markdown at the root or under docs/, and the
+          # licence. Everything else is code, .github/ included. Nothing in
+          # CI reads these files; README.md and LICENSE are copied only by
+          # the release workflow's scripts/package.ps1.
+          is_docs() {
+            case "$1" in
+              .github/*) return 1 ;;
+              docs/*.md) return 0 ;;
+              */*) return 1 ;;
+              *.md|LICENSE|LICENSE.*) return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+
+          base="$(git merge-base "${PR_BASE_SHA}" "${PR_HEAD_SHA}")"
+          # --no-renames lists both sides of a rename, so moving source into
+          # docs/ still counts as a code change.
+          files="$(git diff --name-only --no-renames "${base}" "${PR_HEAD_SHA}")"
+
+          code=false
+          count=0
+          while IFS= read -r file; do
+            [[ -z "${file}" ]] && continue
+            count=$((count + 1))
+            if is_docs "${file}"; then
+              echo "docs  ${file}"
+            else
+              echo "code  ${file}"
+              code=true
+            fi
+          done <<< "${files}"
+
+          if [[ "${count}" -eq 0 ]]; then
+            echo "No changed files found: running everything."
+            code=true
+          fi
+
+          echo "code=${code}" >> "${GITHUB_OUTPUT}"
+          if [[ "${code}" == "true" ]]; then
+            echo "Code changed: every job runs."
+          else
+            echo "Docs only: the required jobs are skipped."
+          fi
+
   build:
     name: Lint, test, and build
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code != 'false') }}
     # GitHub-hosted on purpose: this repository is public, and self-hosted
     # runners must not run code from pull requests.
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
+      # A job skipped because `changes` failed would count as passing, so a
+      # failed classification runs this job and fails it here.
+      - name: Stop if the changes job failed
+        if: ${{ needs.changes.result != 'success' }}
+        shell: bash
+        run: |
+          echo "::error::The changes job did not succeed: ${{ needs.changes.result }}. Fix or rerun it."
+          exit 1
+
       - name: Check out repository
         uses: actions/checkout@v7
 
@@ -99,9 +188,20 @@ jobs:
 
   security:
     name: Dependency policy
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code != 'false') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # A job skipped because `changes` failed would count as passing, so a
+      # failed classification runs this job and fails it here.
+      - name: Stop if the changes job failed
+        if: ${{ needs.changes.result != 'success' }}
+        shell: bash
+        run: |
+          echo "::error::The changes job did not succeed: ${{ needs.changes.result }}. Fix or rerun it."
+          exit 1
+
       - name: Check out repository
         uses: actions/checkout@v7
 
