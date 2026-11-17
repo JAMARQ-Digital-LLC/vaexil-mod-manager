@@ -11,6 +11,13 @@ ignore = [
     # the shipped exe. Slint 1.18.1 is the newest release. Expires 2027-02-08;
     # recorded in agentic-instructions docs/security-advisory-decisions.md.
     { id = "RUSTSEC-2026-0441", reason = "compile-time only via Slint's spin_on; no upgrade; expires 2027-02-08" },
+    # chrono is unmaintained, not vulnerable. Slint's i-slint-core (1.18.1
+    # and 1.19.0) requires it with no feature to turn it off, so it ships in
+    # the exe. rmcp 3.10 (vmm-cli's MCP server) also requires it; that path
+    # goes when vmm-cli moves to the agent kit's own server (kit 8). Owner go
+    # 2026-11-17. Expires 2027-02-17; recorded in agentic-instructions
+    # docs/security-advisory-decisions.md.
+    { id = "RUSTSEC-2026-0543", reason = "chrono unmaintained, required by Slint's i-slint-core and rmcp; no upgrade; expires 2027-02-17" },
 ]
 
 [licenses]
