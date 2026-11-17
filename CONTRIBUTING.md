@@ -27,7 +27,7 @@ cargo run -p vmm-cli -- schema --out schema   # after changing a --json shape; c
 ./scripts/smoke-mouse-clicks.ps1
 ```
 
-CI runs all of these on every pull request, plus `cargo deny check`, and fails when `schema/` doesn't match the code. A change to a `--json` shape that could break a reader bumps `SCHEMA_VERSION` in `crates/core/src/schema.rs`. The command line's golden files are in `crates/cli/tests/golden/`; to accept a deliberate change, run its tests with `VMM_UPDATE_GOLDEN=1` and review the diff. Test clicks with the mouse, not only with UI Automation's Invoke, which skips the mouse path. `cargo deny` bans HTTP and TLS crates and rejects yanked or vulnerable ones. Both CI checks must pass before a pull request can merge.
+CI runs all of these on every pull request, plus `cargo deny check`, and fails when `schema/` doesn't match the code. A change to a `--json` shape that could break a reader bumps `SCHEMA_VERSION` in `crates/core/src/schema.rs`. The command line's golden files are in `crates/cli/tests/golden/`; to accept a deliberate change, run its tests with `VMM_UPDATE_GOLDEN=1` and review the diff. Test clicks with the mouse, not only with UI Automation's Invoke, which skips the mouse path. `cargo deny` bans HTTP and TLS crates and rejects yanked or vulnerable ones. Both CI checks must pass before a pull request can merge. A pull request that changes only root Markdown, Markdown under `docs/` or `LICENSE` skips both checks, which then pass as skipped; a `.github/` change always runs them.
 
 - Keep each pull request to one change.
 - Add tests for behaviour that can be tested. Logic belongs in the crate that owns it (core, a backend, or the engine), where it is unit tested; the window only turns the engine's answers into what it shows.
