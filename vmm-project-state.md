@@ -79,6 +79,7 @@ The working state around the plan page and the docs. The plan page holds the roa
 - SMF refreshes `cleanPackageDefinition.txt` itself but never `cleanThumbs.dat`. Stage 04 must replace a stale one after a game update.
 - SMF's `cache` (about 6.4 GB) is regenerable; leave it out of backups.
 - Advisory exception: pin-utils RUSTSEC-2026-0441 is ignored until 2027-02-08. Fix it together with Modlist Launcher and Keeplight.
+- Advisory exception: chrono RUSTSEC-2026-0543 is ignored in `deny.toml` until 2027-02-17 (owner go 2026-11-17), cargo-deny only. chrono comes through Slint's i-slint-core (no release drops it) and through rmcp 3.10 in `vmm-cli`. Moving `vmm-cli` to the agent kit's own MCP server (kit 8, as Keeplight did in keeplight#30) removes the rmcp path; remove the ignore when Slint drops chrono too.
 - No AI attribution in commits or PRs. Commit with explicit pathspecs.
 
 ## Context Compaction Checklist
