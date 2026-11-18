@@ -53,6 +53,7 @@ The working state around the plan page and the docs. The plan page holds the roa
 - Known gaps:
   - Type guesses put Lighting Ultimate and the glasses fix in Gameplay. Fix them by hand with Edit, then Type.
   - SMF 2.33.43 and 2.33.44 are missing from the release table, so either would show as unknown until stage 04 replaces the table.
+- QA tour of 0.2.0 (2026-11-14, JASON-PC): VMM 0.2.0 QA Tour (https://claude.ai/artifact/996eamhMj5pKnfpqTXW6Rj), 37 findings (0 blockers, 13 annoying, 24 polish), not yet triaged. Summarized in the QA Library (https://claude.ai/artifact/Bq3fR9GV6rqq3iffF8N5hx), VMM tab.
 - No GitHub release exists yet.
 
 ## Temporary Logic Rules & Constraints
