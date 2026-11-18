@@ -55,7 +55,7 @@ The working state around the plan page and the docs. The plan page holds the roa
   - SMF 2.33.43 and 2.33.44 are missing from the release table, so either would show as unknown if installed by hand ("Update SMF…" names the version it installs, `smf-versions.json`).
   - A hung `Deploy.exe` (no window, log stopped) is not detected: the deploy just keeps running. Noted 2026-10-25 from Modlist Launcher's hung MO2 (#21) as a "the log has gone quiet" warning for old stage 03; E4 built the reports but not this warning. Next Up H.
   - The `list_mods` reply was 431,000 characters on 2026-11-14 (614c4159, the side chat): fixed by #28 the same day. `ModSummary` carries `optionCount`/`chosenOptions`, and `get_mod` shows at most 100 options. Nothing left.
-- QA tour of 0.2.0 (2026-11-14, JASON-PC): VMM 0.2.0 QA Tour (https://claude.ai/artifact/996eamhMj5pKnfpqTXW6Rj), 37 findings (0 blockers, 13 annoying, 24 polish). The owner has not reacted to it yet, and no code has changed since 0.2.0, so all 37 are open. Each is on exactly one Next Up card, B to G (checked 2026-11-18). The tour's own grouping left out P2; it is on card B with P1. Summarized in the QA Library (https://claude.ai/artifact/Bq3fR9GV6rqq3iffF8N5hx), VMM tab.
+- QA tour of 0.2.0 (2026-11-14, JASON-PC): VMM 0.2.0 QA Tour (https://claude.ai/artifact/996eamhMj5pKnfpqTXW6Rj), 37 findings (0 blockers, 13 annoying, 24 polish). No code has changed since 0.2.0, so all 37 are open; on 2026-11-18 the owner accepted the default order for the cards. Each is on exactly one Next Up card, B to G (checked 2026-11-18). The tour's own grouping left out P2; it is on card B with P1. Summarized in the QA Library (https://claude.ai/artifact/Bq3fR9GV6rqq3iffF8N5hx), VMM tab.
 - One GitHub release: v0.2.0 (2026-11-14).
 
 ## Temporary Logic Rules & Constraints
@@ -87,7 +87,7 @@ The working state around the plan page and the docs. The plan page holds the roa
 
 ## Next Up
 
-Order (2026-11-18; the owner may reorder): A, then B to D (the QA tour suggests these before E9), then E to H, which can ride along with E9. B to G come from the 0.2.0 QA tour (https://claude.ai/artifact/996eamhMj5pKnfpqTXW6Rj); the finding ids are the tour's. None is approved yet: the owner has not reacted to the tour.
+Order (owner, 2026-11-18: "go with current defaults"): A, then B to D before E9, as the QA tour suggests, then E to H, which can ride along with E9. B to G come from the 0.2.0 QA tour (https://claude.ai/artifact/996eamhMj5pKnfpqTXW6Rj); the finding ids are the tour's. Each card still starts only when the owner says go.
 
 ### A. Windows builds for Atlas's Reinstall
 
