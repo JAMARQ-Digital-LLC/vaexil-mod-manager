@@ -6,7 +6,7 @@ members = ["crates/core", "crates/backend-smf", "crates/engine", "crates/cli", "
 version = "0.2.0"
 edition = "2024"
 license = "GPL-3.0-only"
-repository = "https://github.com/jmars319/vaexil-mod-manager"
+repository = "https://github.com/JAMARQ-Digital-LLC/vaexil-mod-manager"
 rust-version = "1.92"
 publish = false
 
