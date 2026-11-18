@@ -40,21 +40,23 @@ The working state around the plan page and the docs. The plan page holds the roa
     - It is refused during a deploy or an SMF update, rechecked just before closing (Codex P1). The feed is checked daily on a real install. `vmm update check` / `vmm update --yes`.
     - #36 bumped to 0.2.0 (608909f); tag v0.2.0. Release https://github.com/jmars319/vaexil-mod-manager/releases/tag/v0.2.0 published 2026-11-14 16:27Z; the feed points at it (SHA-256 18258f0a…797d, matches SHA256SUMS).
     - Verified end to end: an installed 0.1.0 showed the notice, updated from its own Settings (closed 11:28:01, reopened 11:28:03 local), and both installed exes are byte-identical to the release.
-    - Governance: agentic-instructions#441 (registry and deployment readiness) and jamarq-releases#15 (README) are open.
-  - Next: E9 deploy engine, `mo2` and Cyberpunk (a multi-session stage; start fresh).
+    - Governance: agentic-instructions#441 (registry and deployment readiness) and jamarq-releases#15 (README), both merged 2026-11-14.
+  - Next: the QA tour's usability cards B to D (the tour's U1 to U3) before E9, if the owner agrees (see Next Up); then E9 deploy engine, `mo2` and Cyberpunk (a multi-session stage; start fresh, waits on the owner's go).
 - Old stages 03 to 06 now sit inside the ADR 0003 sequence (see above). The old repo `JAMARQ-Digital-LLC/vaexil-simple-mod-framework` is archived, and its Dependabot #24 closed, after the app's first deploy on this PC.
 
 ## Active Task State & Known Regressions
 
 - E1 to E8 are done. Installed on JASON-PC: 0.2.0, the first release, which the app installed itself on 2026-11-14 11:28. Before that, 00:22: #29's build (1fb9b1d code), with #31's installer, while the window and a Claude Code session's `vmm.exe mcp` were running. #31 sets a running exe aside as `*.old-<time>` (a running exe can be renamed) instead of failing, and deletes those copies at the next install once nothing runs them. Stage 02 is done: `main` was at #17 (ba4145d) when it was installed on JASON-PC. The owner's first deploy through VMM (2026-11-13 03:19 to 03:34) succeeded: Deploy.exe exit 0, "Done in 15m", 0 errors in VMM's log. Overnight (owner's go, 2026-11-13): ADR steps E1 to E5, each a PR merged when green, waiting on CI allowed for tonight, nothing installed until the owner is back, and stop after E5 or at the first point that needs the owner. The old fork is archived once the deploy has succeeded (it did).
 - Merging needs every review thread resolved (branch protection: conversation resolution and linear history). GitHub auto-merge is off for this repo. Codex reviews only when asked with `@codex review` (owner, 2026-11-14: automatic reviews used up their Codex usage).
-- Installed on JASON-PC: built from d34a990 (E7 merged) with `scripts/package.ps1` and installed per-user with the Inno installer (`/VERYSILENT`) on 2026-11-13 17:54, over the stage 02 build (owner's go). Both installed exes' SHA-256 match the build. Still versioned 0.1.0, because nothing is released. Checked with the installed `vmm` without clicking: SMF 2.33.45 (the newest), 15 mods, 10 on. It reports "Changed since the last deploy" because the fingerprint now includes `Deploy.exe`, so the deploy recorded by the old build can't match; the next deploy (or playing as is) clears it. AI changes are off on the real install. Steam's Play button was connected on 2026-11-13 by the owner (backup in `steam-backups`). Claude Code (the desktop app's copy), Gemini CLI 0.68.0 and Codex CLI 0.169.0 (npm, installed 2026-11-14 with the owner's go) all have `vaexil-mod-manager` added. Gemini uses it only in trusted folders.
+- Before 0.2.0 (superseded by the line above): the E7 build (d34a990) was installed on 2026-11-13 17:54. Checked then with the installed `vmm`: SMF 2.33.45, 15 mods, 10 on. AI changes are off on the real install. Steam's Play button was connected on 2026-11-13 by the owner (backup in `steam-backups`). Claude Code (the desktop app's copy), Gemini CLI 0.68.0 and Codex CLI 0.169.0 (npm, installed 2026-11-14 with the owner's go) all have `vaexil-mod-manager` added. Gemini uses it only in trusted folders.
 - HITMAN folder (2026-11-12): official SMF 2.33.45 applied the way SMF's updater does, Vortex leftovers removed, the owner's 10-mod `config.json` restored. Test deploy took 30m32s with 0 errors. The pre-reinstall backup is in `Downloads\hitman-smf-backup-2026-11-12` until the owner has checked the game.
 - Known gaps:
   - Type guesses put Lighting Ultimate and the glasses fix in Gameplay. Fix them by hand with Edit, then Type.
-  - SMF 2.33.43 and 2.33.44 are missing from the release table, so either would show as unknown until stage 04 replaces the table.
-- QA tour of 0.2.0 (2026-11-14, JASON-PC): VMM 0.2.0 QA Tour (https://claude.ai/artifact/996eamhMj5pKnfpqTXW6Rj), 37 findings (0 blockers, 13 annoying, 24 polish), not yet triaged. Summarized in the QA Library (https://claude.ai/artifact/Bq3fR9GV6rqq3iffF8N5hx), VMM tab.
-- No GitHub release exists yet.
+  - SMF 2.33.43 and 2.33.44 are missing from the release table, so either would show as unknown if installed by hand ("Update SMF…" names the version it installs, `smf-versions.json`).
+  - A hung `Deploy.exe` (no window, log stopped) is not detected: the deploy just keeps running. Noted 2026-10-25 from Modlist Launcher's hung MO2 (#21) as a "the log has gone quiet" warning for old stage 03; E4 built the reports but not this warning. Next Up H.
+  - The `list_mods` reply was 431,000 characters on 2026-11-14 (614c4159, the side chat): fixed by #28 the same day. `ModSummary` carries `optionCount`/`chosenOptions`, and `get_mod` shows at most 100 options. Nothing left.
+- QA tour of 0.2.0 (2026-11-14, JASON-PC): VMM 0.2.0 QA Tour (https://claude.ai/artifact/996eamhMj5pKnfpqTXW6Rj), 37 findings (0 blockers, 13 annoying, 24 polish). The owner has not reacted to it yet, and no code has changed since 0.2.0, so all 37 are open. Each is on exactly one Next Up card, B to G (checked 2026-11-18). The tour's own grouping left out P2; it is on card B with P1. Summarized in the QA Library (https://claude.ai/artifact/Bq3fR9GV6rqq3iffF8N5hx), VMM tab.
+- One GitHub release: v0.2.0 (2026-11-14).
 
 ## Temporary Logic Rules & Constraints
 
@@ -85,15 +87,43 @@ The working state around the plan page and the docs. The plan page holds the roa
 
 ## Next Up
 
-Order (2026-11-18, set when the section was added for the fleet main-build task; the owner may reorder): A.
+Order (2026-11-18; the owner may reorder): A, then B to D (the QA tour suggests these before E9), then E to H, which can ride along with E9. B to G come from the 0.2.0 QA tour (https://claude.ai/artifact/996eamhMj5pKnfpqTXW6Rj); the finding ids are the tour's. None is approved yet: the owner has not reacted to the tour.
 
 ### A. Windows builds for Atlas's Reinstall
 
 Add `main-build.yml`, the release's Windows build stamped `+main.<sha>` with no publishing, so Atlas can reinstall Vaexil Mod Manager on JASON-PC from main. Fleet: main-build. Fixes the self-updater, which reads a `+main` version as no version and would never offer the next release, and moves `release.yml` from the tag push to a dispatch the owner starts (owner, 2026-11-18). Brief: `docs/feature-briefs/main-build.md`
 
+### B. Undo and confirm for one-click actions
+
+The tour's U1, its first priority because it protects mod setups. S1 Delete setup removes it at once (confirm, or an Undo notice; `crates/app/src/gui/wire.rs`). S3 Use replaces the current mods without a word (offer to save them as a setup first). P1 "Start with every mod off" can't be undone (save the mods that were on when a pass starts, offer to put them back when it ends). P2 End pass hides what the pass found (show which batches were good and bad; not in the tour's grouping, added here). ST3 "Put Steam's launch options back" acts at once (the same confirm panel as Connect). X1 A broken `config.json` has no way back (offer "Restore the copy from <time>" from `config-backups`). Any new write updates `docs/safety-model.md` in the same PR. Source: QA tour, 2026-11-14.
+
+### C. Big libraries
+
+The tour's U2; the test case is Downright Excessive Renaming Project's 1,833 options on JASON-PC. M6 a search field over the Mods view (name, author, id). E1 size the Edit sheet's options area to its content, up to the window height. E2 search and collapsible groups in the Edit sheet. E3 "Reset to the mod's defaults". P3 a filter over the pass's batch picker. Source: QA tour, 2026-11-14.
+
+### D. Look and layout
+
+The tour's U3. S2 setup and batch text fields aren't themed (light grey on the dark sheet). ST1 the PATH confirm panel overflows its Settings card. M3 long author lists clipped mid-word (first two and "+N more"). M4 cap the content width around 1,100 px. M5 the title wraps to three lines at 640×480. L1 Auto-sort's message pushes the list down. L2 no guidance in Load order when no mods are on. ST6 a minimum window size around 800×600. A3 the version window can be maximised. `theme.slint` is shared byte-for-byte with Modlist Launcher and Keeplight, so a theme change goes to all three. Source: QA tour, 2026-11-14.
+
+### E. Plain words and notices you can act on
+
+The tour's U4, which can ride along with E9. M1 the SMF badge shows a hash for an unknown version. M2 a broken manifest shows raw parser output (say what to do, parser text behind a disclosure). D1 unrecognised deploy warnings read oddly ("Other warning", explanation under each). D2 a failed deploy's report doesn't say what failed (show the last log lines). PL1 the non-Steam Play message uses "from Folder" and sits far from Play. ST2 times shown in UTC (show local time). ST4 "Check" should say "Check connection". ST5 the AI tools card leads with `vmm mcp` jargon and the changes switch (plain words, then Connect, test, and the switch last). ST8 no "Waiting for <app>…" state after copying a test request. X2 the SMF download page is plain text (a button). M7 the update notice can't be clicked (open the update card). Source: QA tour, 2026-11-14.
+
+### F. Screen readers
+
+The tour's U5; needs a Narrator pass to verify. A1 sheets don't hide the window behind them from the accessibility tree. A2 mod switches are plain Buttons without their on or off state. ST7 Escape may not close Settings after a click inside it (unconfirmed; the key was sent by script, so check by hand first). Source: QA tour, 2026-11-14.
+
+### G. Command-line polish
+
+The tour's C group; tiny, fits any PR. C1 `vmm mods` columns drift with long ids. C2 `vmm order` shows ids only (add the name). C3 "Run `vmm help` for the commands." printed twice after an unknown command. Source: QA tour, 2026-11-14.
+
+### H. A warning when Deploy.exe goes quiet
+
+A deploy whose `Deploy.exe` has no window and whose log stops growing is never flagged; the band just says it's deploying. Warn after a quiet spell and offer to end it after a confirm that rechecks it is the same process, the way Modlist Launcher handles a hung MO2 (modlist-launcher#21: "Not responding" after 60 s, End MO2). Real deploys take 15 to 30 minutes with long silent stretches, so measure the longest normal gap in `logs\deploy-*.log` before picking the threshold. Source: win: Vaexil Mod Manager session, 2026-10-25.
+
 ## Context Compaction Checklist
 
-- Before stopping: update this file, the plan page's Now and Done tabs (same URL), and the memory note `vaexil-smf-plan`.
+- Before stopping: update this file, the plan page's Now, Next and Done tabs (same URL), and the project memory note on the machine doing the work (`vaexil-smf-plan` on JASON-PC). A card that comes from the QA tour also updates the QA Library's VMM tab.
 - Don't wait for Codex: it reviews only when asked. Ask (`@codex review`) only for risky changes or when the owner wants it, and wait for its summary to name the head before merging.
 - Re-check `git status`, open PRs (`gh pr list`) and `main`'s CI before trusting anything above.
 - Verify HITMAN's SMF version and Steam build before any work that depends on them; both change without notice.
