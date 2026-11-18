@@ -83,6 +83,14 @@ The working state around the plan page and the docs. The plan page holds the roa
 - Advisory exception: chrono RUSTSEC-2026-0543 is ignored in `deny.toml` until 2027-02-17 (owner go 2026-11-17), cargo-deny only. chrono comes through Slint's i-slint-core (no release drops it) and through rmcp 3.10 in `vmm-cli`. Moving `vmm-cli` to the agent kit's own MCP server (kit 8, as Keeplight did in keeplight#30) removes the rmcp path; remove the ignore when Slint drops chrono too.
 - No AI attribution in commits or PRs. Commit with explicit pathspecs.
 
+## Next Up
+
+Order (2026-11-18, set when the section was added for the fleet main-build task; the owner may reorder): A.
+
+### A. Windows builds for Atlas's Reinstall
+
+Add `main-build.yml`, the release's Windows build stamped `+main.<sha>` with no publishing, so Atlas can reinstall Vaexil Mod Manager on JASON-PC from main. Fleet: main-build. Fixes the self-updater, which reads a `+main` version as no version and would never offer the next release, and moves `release.yml` from the tag push to a dispatch the owner starts (owner, 2026-11-18). Brief: `docs/feature-briefs/main-build.md`
+
 ## Context Compaction Checklist
 
 - Before stopping: update this file, the plan page's Now and Done tabs (same URL), and the memory note `vaexil-smf-plan`.
