@@ -1,14 +1,22 @@
 name: Release
 
-# Builds the portable zip and the per-user installer for a version tag and
-# attaches them, with checksums, to a draft GitHub release for review.
+# A release goes out only when the owner asks for one (owner, 2026-11-18):
+# the owner starts this workflow on main. It tags main's head as
+# v<workspace version>, refusing a version that already has a tag or a
+# release, builds the portable zip and the per-user installer, and attaches
+# them, with checksums, to a draft GitHub release for review. Nothing reaches
+# the update feed until the owner publishes that draft (publish-feed.yml).
+# Builds of main between releases come from main-build.yml.
 
 on:
-  push:
-    tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   package:
@@ -16,8 +24,33 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
+      - name: Only from main
+        if: github.ref != 'refs/heads/main'
+        shell: pwsh
+        run: |
+          Write-Output "::error::Releases are made from main, not $env:GITHUB_REF."
+          exit 1
+
       - name: Check out repository
         uses: actions/checkout@v7
+
+      - name: Read the version and refuse one already released
+        id: version
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = (cargo metadata --no-deps --format-version 1 --locked | ConvertFrom-Json).packages |
+              Where-Object name -eq 'vaexil-mod-manager' | Select-Object -ExpandProperty version
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "The workspace version $version is not MAJOR.MINOR.PATCH." }
+          $tag = "v$version"
+          git ls-remote --exit-code --tags origin "refs/tags/$tag" | Out-Null
+          if ($LASTEXITCODE -eq 0) { throw "$tag is already tagged. Bump the workspace version first." }
+          # A draft has no tag yet, so look for the release too.
+          gh release view $tag --json tagName 2>$null | Out-Null
+          if ($LASTEXITCODE -eq 0) { throw "A release named $tag already exists (perhaps a draft). Delete it or bump the version." }
+          $global:LASTEXITCODE = 0
+          "tag=$tag" >> $env:GITHUB_OUTPUT
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -36,9 +69,14 @@ jobs:
         shell: pwsh
         run: ./scripts/package.ps1
 
-      - name: Create draft release
+      - name: Tag main's head and create the draft release
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          gh release create "$env:GITHUB_REF_NAME" dist/*.zip dist/*.exe dist/SHA256SUMS.txt --draft --title "Vaexil Mod Manager $env:GITHUB_REF_NAME" --generate-notes
+          git tag $env:TAG $env:GITHUB_SHA
+          git push origin "refs/tags/$env:TAG"
+          if ($LASTEXITCODE -ne 0) { throw "Couldn't push $env:TAG" }
+          gh release create $env:TAG dist/*.zip dist/*.exe dist/SHA256SUMS.txt --verify-tag --draft --title "Vaexil Mod Manager $env:TAG" --generate-notes
+          if ($LASTEXITCODE -ne 0) { throw 'Creating the draft release failed' }

@@ -1,6 +1,6 @@
 # Vaexil Mod Manager: Windows builds for Atlas's Reinstall (Feature session brief)
 
-Status: carded 2026-11-18 as Next Up item A in `vmm-project-state.md`. Not started. Fleet: main-build, with Vaexbot C, Studio AE, Pulse B, Keeplight A and Modlist Launcher A.
+Status: carded 2026-11-18 as Next Up item A in `vmm-project-state.md`; built 2026-11-18 on `feat/windows-builds-for-atlas-s-reinstall` and removed from Next Up there. Fleet: main-build, with Vaexbot C, Studio AE, Pulse B, Keeplight A and Modlist Launcher A.
 
 **Title line:**
 
