@@ -1,9 +1,12 @@
 name: Publish to jamarq-releases
 
-# When a reviewed draft release is published, copies its installer to
-# JAMARQ-Digital-LLC/jamarq-releases as vaexil-mod-manager-v<version>, and points
-# the vaexil-mod-manager-latest feed (release.json: version, url, sha256) at it.
-# The build itself stays in release.yml; this job only republishes its output.
+# Releases go out only when the owner asks (owner, 2026-11-18): the owner
+# starts release.yml, which makes a draft, and publishing that reviewed draft
+# runs this job. It copies the installer to JAMARQ-Digital-LLC/jamarq-releases
+# as vaexil-mod-manager-v<version>, and points the vaexil-mod-manager-latest
+# feed (release.json: version, url, sha256) at it. The build itself stays in
+# release.yml; this job only republishes its output. Builds from main
+# (main-build.yml) never come here.
 
 on:
   release:

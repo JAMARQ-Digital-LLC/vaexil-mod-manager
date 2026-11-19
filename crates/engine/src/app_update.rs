@@ -33,7 +33,9 @@ pub const LAST_CHECK: &str = "app-update.json";
 /// Where installers are downloaded.
 const DOWNLOADS: &str = "app-updates";
 
-/// This build's version.
+/// This build's version. A build from main is stamped
+/// `<version>+main.<sha7>` (main-build.yml); a release is plain
+/// MAJOR.MINOR.PATCH.
 pub const CURRENT: &str = env!("CARGO_PKG_VERSION");
 
 /// The feed's manifest, as jamarq-releases' `publish/feed.mjs` writes it.
@@ -64,8 +66,12 @@ fn version(v: &str) -> Option<[u64; 3]> {
     <[u64; 3]>::try_from(parts).ok()
 }
 
-/// Whether `candidate` is a newer version than `current`.
+/// Whether `candidate`, a release's version, is newer than `current`, this
+/// build's. Only the part of `current` before any `+` counts, so a build from
+/// main (`0.2.0+main.abc1234`) is offered 0.2.1 but not 0.2.0. The candidate
+/// stays strict: the feed only ever names MAJOR.MINOR.PATCH.
 pub fn is_newer(candidate: &str, current: &str) -> bool {
+    let current = current.split_once('+').map_or(current, |(release, _)| release);
     matches!((version(candidate), version(current)), (Some(a), Some(b)) if a > b)
 }
 
@@ -116,7 +122,17 @@ fn check_with(
 
 /// The last check's newer release, if it is still newer than this build.
 pub fn known_newer(data: &Path) -> Option<Release> {
-    last_check(data)?.latest.filter(|r| is_newer(&r.version, CURRENT))
+    still_newer(last_check(data).as_ref(), CURRENT)
+}
+
+/// The newer release `last` found, if it is newer than `current`.
+fn still_newer(last: Option<&LastCheck>, current: &str) -> Option<Release> {
+    last?.latest.clone().filter(|r| is_newer(&r.version, current))
+}
+
+/// The installer's file name: always the release's own version.
+fn installer_name(release: &Release) -> String {
+    format!("VaexilModManager-{}-setup.exe", release.version)
 }
 
 /// Downloads `release`'s installer into the data folder and checks its
@@ -127,7 +143,7 @@ pub fn download(data: &Path, release: &Release, progress: &mut dyn FnMut(String)
     let save = |e: std::io::Error| VmmError::new(ErrorCode::SaveFailed, format!("Couldn't prepare the update: {e}"));
     std::fs::create_dir_all(&dir).map_err(save)?;
     // Only this release's installer is kept.
-    let name = format!("VaexilModManager-{}-setup.exe", release.version);
+    let name = installer_name(release);
     for e in std::fs::read_dir(&dir).map_err(save)?.flatten() {
         if e.file_name().to_string_lossy() != name {
             let _ = std::fs::remove_file(e.path());
@@ -170,7 +186,7 @@ impl Engine {
     /// What the last check of the release feed found.
     pub fn app_update_status(&self) -> vmm_core::schema::AppUpdateStatus {
         let last = self.data_dir().and_then(last_check);
-        let latest = last.as_ref().and_then(|l| l.latest.clone()).filter(|r| is_newer(&r.version, CURRENT));
+        let latest = still_newer(last.as_ref(), CURRENT);
         vmm_core::schema::AppUpdateStatus {
             schema_version: vmm_core::schema::SCHEMA_VERSION,
             current: CURRENT.to_string(),
@@ -218,6 +234,34 @@ mod tests {
         assert!(!is_newer("0.2.0", "0.2.0"));
         assert!(!is_newer("0.1.9", "0.2.0"));
         assert!(!is_newer("0.2", "0.1.0"), "not MAJOR.MINOR.PATCH");
+    }
+
+    const MAIN: &str = "0.2.0+main.abc1234";
+
+    #[test]
+    fn a_build_from_main_compares_as_its_release() {
+        assert!(!is_newer("0.2.0", MAIN), "its own release isn't newer");
+        assert!(!is_newer("0.1.9", MAIN));
+        assert!(is_newer("0.2.1", MAIN));
+        assert!(is_newer("0.3.0", MAIN));
+        assert!(!is_newer("0.2.1+main.def5678", "0.2.0"), "the feed's version stays strict");
+        assert!(!is_newer("0.2.1", "0.2+main.abc1234"));
+    }
+
+    #[test]
+    fn a_build_from_main_is_offered_the_next_release_and_status_agrees() {
+        let tmp = tempfile::tempdir().unwrap();
+        let next = GOOD.replace("0.2.0", "0.2.1");
+        assert_eq!(check_with(tmp.path(), MAIN, || Ok(GOOD.as_bytes().to_vec())).unwrap(), None);
+        assert_eq!(still_newer(last_check(tmp.path()).as_ref(), MAIN), None);
+        let found = check_with(tmp.path(), MAIN, || Ok(next.as_bytes().to_vec())).unwrap().unwrap();
+        assert_eq!(found.version, "0.2.1");
+        let last = last_check(tmp.path()).unwrap();
+        assert_eq!(last.current, MAIN, "the full stamped version is kept");
+        // known_newer and app_update_status both read still_newer.
+        assert_eq!(still_newer(Some(&last), MAIN), Some(found.clone()));
+        assert_eq!(still_newer(Some(&last), "0.2.1+main.def5678"), None);
+        assert_eq!(installer_name(&found), "VaexilModManager-0.2.1-setup.exe");
     }
 
     #[test]
