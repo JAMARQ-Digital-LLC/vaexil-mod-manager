@@ -2,7 +2,9 @@
 
 Plan artifact: https://claude.ai/artifact/HBDVnjvCrkyQsY7Bak28Dm
 
-The working state around the plan page and the docs. The plan page holds the roadmap and the ledger; `docs/safety-model.md` and `docs/adr/` hold the rules. Checked 2026-11-13 on JASON-PC.
+History: vmm-history.md
+
+The working state around the plan page and the docs. The plan page holds the roadmap; `vmm-history.md` holds the ledger; `docs/safety-model.md` and `docs/adr/` hold the rules. Checked 2026-11-13 on JASON-PC.
 
 ## Core Project Architecture & Stack
 
@@ -15,6 +17,7 @@ The working state around the plan page and the docs. The plan page holds the roa
 
 ## Current Structural Milestones / Active Feature Goals
 
+- **History moved off the plan page (2026-11-23).** Finished work, the dated ledger and completed setup now live in `vmm-history.md`; the plan page's Done tab keeps the last two weeks and links to it (agentic-instructions `docs/project-plan-artifact.md`, "Where history lives").
 - Stage 00 (direction, ADR-0034) and stage 01 (repo, read-only first window, #1) are done.
 - Stage 02, in progress since 2026-11-13, in four PRs:
   1. Mods view grouped by type, with on/off switches. #12, merged 2026-11-13 as 118506b. The app's first write.
