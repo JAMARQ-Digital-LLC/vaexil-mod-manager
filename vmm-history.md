@@ -1,0 +1,42 @@
+# Vaexil Mod Manager history
+
+What has been built and when, newest first. The plan page
+(https://claude.ai/artifact/HBDVnjvCrkyQsY7Bak28Dm) shows what is upcoming and
+links here; the state file (`vmm-project-state.md`) holds current working state.
+Plain Markdown on purpose: quick to read on GitHub or in an editor
+(`docs/project-plan-artifact.md`, "Where history lives", in agentic-instructions).
+Started 2026-11-23 from `templates/project-history.md`.
+
+Moved from the plan page's Done tab on 2026-11-23, as written there; an entry's "now", "still" or "not yet" means as of its own date.
+
+PR references rechecked 2026-11-23 against GitHub: 43 referenced, 43 merged; not merged: none. (37 in this repo, counting each PR in a range such as "#18 to #22", plus agentic-instructions#343, #344, #414, #415 and #441, and jamarq-releases#15.)
+
+## Stages
+
+- **00. The new direction written down (24 Oct):** Decision log, ADR-0034 (Windows-native apps are Rust and Slint), the old modernization plan superseded ([agentic-instructions#343](https://github.com/JAMARQ-Digital-LLC/agentic-instructions/pull/343)).
+- **E8. Updates itself, first release (14 Nov):** Self-update from the release feed (#35), installs over running files (#31), version 0.2.0 published and installed by the app itself. See Next.
+- **E1–E7. The AI-ready engine, Steam's Play button, SMF updates (13 Nov):** Engine, command line and schema, MCP server, logs and diagnosis, SMF features everywhere (#18 to #22), Steam's Play button (#24) and keeping SMF current (#25). Installed on this PC. See Next.
+- **02. Mods, load order, setups and Play (13 Nov):** Grouped Mods view and switches (#12), options and types (#14), the Load order view (#16), setups, compatibility passes, Deploy and Play (#17). Installed on this PC; first deploy through the app succeeded.
+- **01. Repo and read-only first window (24 Oct):** [JAMARQ-Digital-LLC/vaexil-mod-manager](https://github.com/JAMARQ-Digital-LLC/vaexil-mod-manager), public, GPL-3.0. It finds HITMAN and SMF and lists the mods (#1), and is in the registry (agentic-instructions#344).
+
+"See Next" in E8 and E1–E7 refers to the plan page's Next tab, which still describes E1 to E8 PR by PR.
+
+## Ledger
+
+- 2026-11-18: Next Up A, your call: [vaexil-mod-manager#47](https://github.com/JAMARQ-Digital-LLC/vaexil-mod-manager/pull/47), merged 19 Nov 03:18 UTC as e461631. The updater now treats a build stamped `0.2.0+main.<sha>` as 0.2.0, so it is offered 0.2.1 but never 0.2.0. `main-build.yml`, which Atlas starts on main, builds the release's installer stamped `+main.<sha7>`, reads the version back from a test install on the runner, and keeps it as the artifact `vaexil-mod-manager-main-<sha>` for 7 days. It makes no release and doesn't touch the feed. A release now happens only when you start `release.yml`, which tags main and makes the draft; publishing the draft still moves the feed. The repo is public, so any signed-in GitHub user can download that artifact. Its first dispatch is still to run.
+- 2026-11-18: Tier A auto-merge, your call: Dependabot minor and patch updates now merge themselves once the required checks pass (vaexil-mod-manager#46); majors still wait for you.
+- 2026-11-18: The repo moved from `jmars319` into `JAMARQ-Digital-LLC` (your decision, so the PCs need only one org-owned GitHub token). Its id, settings, `main` protection and the releases secret all came across, old links redirect, and clones on the Mac and both PCs point at the new address. vaexil-mod-manager#45 updates the links in the repo.
+- 2026-11-18: The JASON-PC sessions were read back on the Mac. The 0.2.0 QA tour's 37 findings became Next Up B to G, and a Deploy.exe hang warning, noted in October and never built, became H (#43). Earlier that day: Next Up A, Windows builds for Atlas's Reinstall (#42); the tour linked from the state file (#41); chrono RUSTSEC-2026-0543 ignored until 17 Feb 2027 (#40); docs-only PRs skip the required CI jobs (#38).
+- 2026-11-14: Later: with your go, E8. The self-updater merged as #35, after two Codex findings were fixed. Two Dependabot bumps merged (tokio, flate2). 0.2.0 was tagged and published, the feed's checksum was checked against the release's, and the installed 0.1.0 updated itself from its own Settings. Registry and feed README updates: agentic-instructions#441, jamarq-releases#15.
+- 2026-11-14: Late on the 13th and into the 14th: your deploy with the E7 build succeeded, and Steam's Play button was connected on the second try. Settings was redesigned (#27) because that second click was easy to miss. Claude Code was connected through the desktop app's own copy, since `claude` isn't on PATH, and answered from your install. That showed the mod list was far too long (#28). One-button AI connect followed (#29). Gemini CLI and Codex CLI were installed with your go and connected. Codex now reviews PRs only when asked, to save your Codex usage. The installer then learned to install over files that are running (#31), and the new build was installed while the app and a Claude Code session were open.
+- 2026-11-13: Later on: with your go, E6 (Steam's Play button, with your addition of playing the deployed build as it is) merged as #24 and E7 (keeping SMF current) as #25, after five and six rounds of Codex findings. The E7 build was installed on this PC at 17:54, over the stage 02 build, once you had closed the old one. Checked with the installed `vmm`: SMF 2.33.45 is the newest, 15 mods, 10 on. Before that: your first deploy through the app succeeded (03:19 to 03:34, no errors), so the old SMF fork was archived and its Dependabot PR closed (agentic-instructions#415). Overnight and into the day, ADR 0003's E1 to E5 merged (#18 to #22), each after Codex's findings were fixed, and the run stopped before E6, which needs your go. The connection dropped once in the early morning, needing a sign-in, and the PC then slept until you were back. Nothing new was installed. Earlier that day: stage 02 began. SMF 2.33.45 recognised (#11). Grouped Mods view and switches (#12), with three Codex review findings fixed before merge. Rebuilt and installed on this PC. Project state file added (#13). This page moved to tabs. The edit sheet for options and type merged as #14 after two Codex findings were fixed, and was installed. The scope widened to many games and AI control: ADR 0003 (#15) accepted with your decisions, recorded in agentic-instructions#414. The order after stage 02 was agreed, with the old stages 03 to 06 folded into the engine work; releases stay unsigned, and VMM will update itself on this PC. Then the Load order view merged as #16, and setups, compatibility passes, Deploy and Play merged as #17, finishing stage 02. Codex review findings on both were fixed before merging. Installed on this PC.
+- 2026-11-12: HITMAN folder cleaned up with your OK. Official SMF 2.33.45 was applied the way SMF's updater does, every file now a plain file. Vortex's 128 backups, its manifest and `Vortex_Mods` were removed. Your real `config.json` was restored: Vortex's 8 Oct redeploy had replaced it with an empty one, which is why the load order looked empty. Test deploy: 30m32s, 0 errors.
+- 2026-11-10: json5 1.3.7 (#7), rebased onto the advisory fix and merged.
+- 2026-11-08: Two Slint advisories cleared; pin-utils ignored until 2027-02-08 together with Modlist Launcher and Keeplight (#8). Released installers publish to jamarq-releases (#9, #10). JASON-PC moved to the Jason account and `C:\JAMARQ`. Vortex uninstalled.
+- 2026-10-31: json5 1.3.5 (#6).
+- 2026-10-25: Modlist Launcher's hung-MO2 handling noted for the future MO2 module.
+- 2026-10-24: Theme fix for mouse clicks, with smoke tests in CI (#5). Repo guides (#4). sha2 and json5 updates (#2, #3). The first window (#1). The direction, the rules and the two views settled with you.
+
+## Owner setup completed
+
+The Done tab had no separate setup section; owner setup is recorded in the ledger entries above (for example the HITMAN folder clean-up on 2026-11-12 and Vortex's removal on 2026-11-08).
