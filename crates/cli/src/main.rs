@@ -112,7 +112,10 @@ fn usage(message: impl Into<String>) -> VmmError {
 }
 
 fn no_data_dir() -> VmmError {
-    VmmError::new(ErrorCode::Io, "There is no folder for Vaexil Mod Manager's data (LOCALAPPDATA isn't set).")
+    VmmError::new(
+        ErrorCode::Io,
+        "There is no folder for Vaexil Mod Manager's data (LOCALAPPDATA isn't set, or scratch refused it).",
+    )
 }
 
 fn parse(raw: Vec<String>) -> Result<Args, VmmError> {
@@ -187,6 +190,15 @@ fn out<T: Serialize>(value: &T, text: String) -> Out {
 fn main() -> ExitCode {
     let raw: Vec<String> = std::env::args().skip(1).collect();
     let crash_caller = if raw == ["mcp"] { "mcp" } else { "cli" };
+    if let Err(e) = vmm_engine::scratch::check() {
+        let report = ErrorReport::from(&e);
+        if raw.iter().any(|a| a == "--json") {
+            println!("{}", serde_json::to_string_pretty(&report).expect("json"));
+        } else {
+            eprintln!("{} [{}]\n{}", e.message, report.error.code, report.error.hint);
+        }
+        return ExitCode::from(u8::try_from(e.code.exit_code()).unwrap_or(10));
+    }
     vmm_engine::crash::install(vmm_engine::host::data_dir(), crash_caller.into());
     // The MCP server owns stdout for the protocol, so it prints nothing else.
     if raw == ["mcp"] {
@@ -234,11 +246,18 @@ fn run(args: Args) -> Result<Out, VmmError> {
     let engine = || Engine::open_as(Caller::Cli);
     match words.as_slice() {
         [] | ["help"] => Ok(Out { json: serde_json::json!({ "usage": USAGE }), text: USAGE.into(), exit: 0 }),
-        ["version"] => Ok(Out {
-            json: serde_json::json!({ "schemaVersion": SCHEMA_VERSION, "appVersion": env!("CARGO_PKG_VERSION") }),
-            text: format!("vmm {} (schema {SCHEMA_VERSION})", env!("CARGO_PKG_VERSION")),
-            exit: 0,
-        }),
+        ["version"] => {
+            let build = if vmm_engine::scratch::release_build() { "release" } else { "dev" };
+            Ok(Out {
+                json: serde_json::json!({
+                    "schemaVersion": SCHEMA_VERSION,
+                    "appVersion": env!("CARGO_PKG_VERSION"),
+                    "build": build,
+                }),
+                text: format!("vmm {} (schema {SCHEMA_VERSION}, {build} build)", env!("CARGO_PKG_VERSION")),
+                exit: 0,
+            })
+        }
         ["errors"] => {
             let list = ErrorCodeList::current();
             let text = list

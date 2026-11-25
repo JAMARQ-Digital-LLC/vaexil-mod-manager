@@ -15,7 +15,7 @@ Bug reports and pull requests are welcome. Vaexil Mod Manager drives the officia
 
 ## Working on it
 
-You need the Rust toolchain (stable, MSVC) and Visual Studio Build Tools. Set `VAEXIL_MOD_MANAGER_GAME` to a fake game folder so development runs never touch a real HITMAN install. `scripts/smoke-minimize-restore.ps1` shows how to make one.
+You need the Rust toolchain (stable, MSVC) and Visual Studio Build Tools. A debug build, or any build from a worktree, is a dev build: its data folder is `%LOCALAPPDATA%\Vaexil Mod Manager Dev`, it finds no game, Steam or AI app except the folders named below, and it never checks for or installs updates. Run it in scratch mode: `VAEXIL_MOD_MANAGER_SCRATCH=1` with throwaway folders in `VAEXIL_MOD_MANAGER_DATA_DIR`, `VAEXIL_MOD_MANAGER_GAME`, `VAEXIL_MOD_MANAGER_STEAM` and `VAEXIL_MOD_MANAGER_AI_APPS` (`scripts/smoke-minimize-restore.ps1` shows how to make a fake game). Scratch refuses, rather than warns, a folder that is missing or inside `%LOCALAPPDATA%\Vaexil Mod Manager` (or `... Dev`), `%APPDATA%`, the real Steam or an AI app's own folders, refuses the network, PATH changes and `steam://` links, and makes the data folder private to you. The engine's own tests always run as scratch; `cargo test --workspace` and both smoke scripts set it. Never run a test against the installed app's data, the real game or Steam.
 
 ```powershell
 cargo fmt --all

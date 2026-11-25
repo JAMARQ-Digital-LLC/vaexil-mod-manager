@@ -50,8 +50,14 @@ impl Fixture {
         let out = Command::new(env!("CARGO_BIN_EXE_vmm"))
             .args(args)
             .arg("--json")
+            // Scratch: every real place replaced, and refused if it were real.
+            .env("VAEXIL_MOD_MANAGER_SCRATCH", "1")
+            .env("VAEXIL_MOD_MANAGER_NETWORK", "offline")
             .env("VAEXIL_MOD_MANAGER_GAME", self.tmp.path().join("game"))
-            .env("VAEXIL_MOD_MANAGER_DATA", self.tmp.path().join("data"))
+            .env("VAEXIL_MOD_MANAGER_DATA_DIR", self.tmp.path().join("data"))
+            .env("VAEXIL_MOD_MANAGER_STEAM", self.tmp.path().join("steam"))
+            .env("VAEXIL_MOD_MANAGER_AI_APPS", self.tmp.path().join("ai-apps"))
+            .env_remove("VAEXIL_MOD_MANAGER_DATA")
             .output()
             .unwrap();
         let text = String::from_utf8(out.stdout).unwrap();
@@ -180,4 +186,53 @@ fn a_plan_from_a_file_and_a_stale_plan() {
     let config = f.tmp.path().join("game/Simple Mod Framework/config.json");
     std::fs::write(&config, "{ loadOrder: [] }").unwrap();
     f.check("apply-stale", &["apply", &id, "--yes"], 4);
+}
+
+/// Scratch refuses to run, before it reads or writes anything, when a folder
+/// is missing or real, or the network is live.
+#[test]
+fn scratch_refuses_missing_or_real_folders() {
+    let f = Fixture::new();
+    let t = f.tmp.path();
+    let run = |change: &dyn Fn(&mut Command)| {
+        let mut cmd = Command::new(env!("CARGO_BIN_EXE_vmm"));
+        cmd.args(["status", "--json"])
+            .env("VAEXIL_MOD_MANAGER_SCRATCH", "1")
+            .env("VAEXIL_MOD_MANAGER_GAME", t.join("game"))
+            .env("VAEXIL_MOD_MANAGER_DATA_DIR", t.join("data"))
+            .env("VAEXIL_MOD_MANAGER_STEAM", t.join("steam"))
+            .env("VAEXIL_MOD_MANAGER_AI_APPS", t.join("ai-apps"))
+            .env_remove("VAEXIL_MOD_MANAGER_DATA")
+            .env_remove("VAEXIL_MOD_MANAGER_NETWORK");
+        change(&mut cmd);
+        let out = cmd.output().unwrap();
+        let json: Value = serde_json::from_slice(&out.stdout).unwrap();
+        (out.status.code().unwrap(), json["error"]["code"].as_str().unwrap_or("").to_string())
+    };
+    assert_eq!(run(&|_| {}).0, 0);
+    for missing in ["VAEXIL_MOD_MANAGER_STEAM", "VAEXIL_MOD_MANAGER_AI_APPS", "VAEXIL_MOD_MANAGER_GAME"] {
+        assert_eq!(
+            run(&|c| {
+                c.env_remove(missing);
+            }),
+            (3, "scratch.refused".into()),
+            "{missing}"
+        );
+    }
+    let local = std::env::var_os("LOCALAPPDATA").map(PathBuf::from).unwrap_or_else(|| t.join("Local"));
+    let real = local.join("Vaexil Mod Manager");
+    assert_eq!(
+        run(&|c| {
+            c.env("VAEXIL_MOD_MANAGER_DATA_DIR", &real).env("LOCALAPPDATA", &local);
+        }),
+        (3, "scratch.refused".into())
+    );
+    assert_eq!(
+        run(&|c| {
+            c.env("VAEXIL_MOD_MANAGER_NETWORK", "live");
+        }),
+        (3, "scratch.refused".into())
+    );
+    // The run that passed made its data folder; nothing else was created.
+    assert!(t.join("data").is_dir());
 }

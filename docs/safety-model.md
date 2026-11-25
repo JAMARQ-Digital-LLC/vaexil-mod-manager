@@ -58,7 +58,9 @@ Enforcement:
 - All writing to SMF's `config.json` is in one module, `crates/backend-smf/src/write.rs`, behind the `Backend` trait's change methods. The app's own files are written only by `crates/engine` (`settings.rs`, `setups.rs`, `store.rs`, `deploy.rs`). Tests cover key order, other keys, JSON5 input, defaults, the backup, a failed backup stopping the write, and a file it cannot read being left alone.
 - The mouse-click smoke test runs the real window against a throwaway game folder and checks that a click changes only the load order and leaves a backup, and that Save in the edit sheet stores the clicked option. It opens Settings and checks that "Add the command line to my PATH" first shows what it will change and that Cancel changes nothing; it never confirms, so it never changes PATH.
 - The command line's golden tests (`crates/cli/tests/golden.rs`) run `vmm --json` against a throwaway game folder, including a plan refused because `config.json` changed after it was made.
-- `VAEXIL_MOD_MANAGER_DATA` moves the app's folder for tests, so they never write to the user's profile.
+- `VAEXIL_MOD_MANAGER_DATA_DIR` (or the old `VAEXIL_MOD_MANAGER_DATA`) moves the app's folder for tests, so they never write to the user's profile. A dev build (debug, or built outside CI and the shared checkout) uses `%LOCALAPPDATA%\Vaexil Mod Manager Dev`, finds no real game, Steam or AI app, and never updates itself (`crates/engine/src/scratch.rs`, `build.rs`).
+- Scratch mode (`VAEXIL_MOD_MANAGER_SCRATCH=1`, always on in the engine's own tests, set by the CLI tests and both smoke scripts) refuses to start unless the data, game, Steam and AI apps folders are all named and none is inside the app's real folders, `%APPDATA%` or the real Steam. It refuses every network request, PATH change and `steam://` link (`scratch.refused`).
+- The data folder is private to the signed-in user: a protected access list with one entry, full control for that user, set when the folder is made and checked at every launch (`host::prepare_data_dir`; test `the_data_folder_is_private_to_this_user`). Nothing else, the installer included, needs it.
 
 ## AI tools
 

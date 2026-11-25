@@ -210,6 +210,13 @@
       "hint": "Install the AI app, or send it the request yourself from the app.",
       "retryable": false,
       "exitCode": 3
+    },
+    {
+      "code": "scratch.refused",
+      "meaning": "A scratch or development run refused something real.",
+      "hint": "Name throwaway folders with the VAEXIL_MOD_MANAGER_ variables, or use the installed app.",
+      "retryable": false,
+      "exitCode": 3
     }
   ]
 }

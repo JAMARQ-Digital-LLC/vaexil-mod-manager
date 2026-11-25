@@ -421,8 +421,9 @@ pub fn daily_smf_check(state: &State) {
         l.installed != installed
             || vmm_engine::deploy::now_ms().saturating_sub(l.checked_at_ms) > vmm_engine::smf_update::CHECK_EVERY_MS
     });
-    // Tests and development runs (a stand-in game) never go online by themselves.
-    if due && vmm_engine::host::game_override().is_none() {
+    // Tests and development runs (a stand-in game, a dev build) never go
+    // online by themselves.
+    if due && vmm_engine::host::game_override().is_none() && vmm_engine::scratch::real_host_allowed() {
         std::thread::spawn(move || {
             let _ = vmm_engine::smf_update::check(&data, &installed);
         });

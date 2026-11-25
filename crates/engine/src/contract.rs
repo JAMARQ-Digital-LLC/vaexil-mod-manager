@@ -116,6 +116,7 @@ impl Engine {
     /// The game a command acts on: the folder named, or the first install found.
     pub fn pick_game(&self, folder: Option<&Path>) -> Result<GameInstall, VmmError> {
         if let Some(folder) = folder {
+            crate::host::game_allowed(folder)?;
             if !vmm_core::game::is_game_root(folder) {
                 return Err(VmmError::new(
                     ErrorCode::GameNotFound,

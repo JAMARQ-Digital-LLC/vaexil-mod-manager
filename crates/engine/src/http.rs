@@ -38,6 +38,8 @@ pub fn fetch(
     use windows::Win32::Networking::WinHttp::*;
     use windows::core::{HSTRING, PCWSTR};
 
+    crate::scratch::check_network(url)?;
+
     struct Handle(*mut core::ffi::c_void);
     impl Drop for Handle {
         fn drop(&mut self) {
@@ -146,11 +148,12 @@ pub fn fetch(
 
 #[cfg(not(windows))]
 pub fn fetch(
-    _url: &str,
+    url: &str,
     _accept: &str,
     _sink: &mut dyn FnMut(&[u8]) -> std::io::Result<()>,
     _progress: &mut dyn FnMut(u64, Option<u64>),
 ) -> Result<(), VmmError> {
+    crate::scratch::check_network(url)?;
     Err(failed("downloads are only made on Windows"))
 }
 
@@ -174,6 +177,7 @@ pub fn get(url: &str, accept: &str) -> Result<Vec<u8>, VmmError> {
 
 /// Downloads `url` to `dest` (through `dest.part`, renamed when complete).
 pub fn download(url: &str, dest: &Path, progress: &mut dyn FnMut(u64, Option<u64>)) -> Result<(), VmmError> {
+    crate::scratch::check_network(url)?;
     let part = dest.with_extension("part");
     let save = |e: std::io::Error| VmmError::new(ErrorCode::SaveFailed, format!("Couldn't save the download: {e}"));
     let mut file = std::io::BufWriter::new(std::fs::File::create(&part).map_err(save)?);
