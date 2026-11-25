@@ -116,10 +116,15 @@ fn write_checked(path: &Path, original: &str, updated: &str, want: &str) -> Resu
 impl Engine {
     /// The Steam installation Steam's Play button is set in.
     /// `VAEXIL_MOD_MANAGER_STEAM` replaces it for tests, so they never touch
-    /// the real Steam.
+    /// the real Steam. A dev build or a scratch run without it has none.
     pub fn steam_root(&self) -> Option<SteamRoot> {
         if let Some(dir) = std::env::var_os("VAEXIL_MOD_MANAGER_STEAM").filter(|d| !d.is_empty()) {
-            return Some(SteamRoot::new(PathBuf::from(dir)));
+            let dir = PathBuf::from(dir);
+            let real = crate::scratch::Real::from_env();
+            if crate::scratch::active() && crate::scratch::check_path("The Steam folder", &dir, &real).is_err() {
+                return None;
+            }
+            return Some(SteamRoot::new(dir));
         }
         host::sources().steam.map(SteamRoot::new)
     }

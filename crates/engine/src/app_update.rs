@@ -101,6 +101,7 @@ pub fn last_check(data: &Path) -> Option<LastCheck> {
 /// the first release the feed doesn't exist, which is nothing newer. No
 /// engine needed, so the window can do it on a worker thread.
 pub fn check(data: &Path) -> Result<Option<Release>, VmmError> {
+    crate::scratch::check_self_update()?;
     check_with(data, CURRENT, || http::get(FEED, "application/json"))
 }
 
@@ -139,6 +140,7 @@ fn installer_name(release: &Release) -> String {
 /// SHA-256. A download that doesn't match is deleted. `progress` gets a line
 /// now and then.
 pub fn download(data: &Path, release: &Release, progress: &mut dyn FnMut(String)) -> Result<PathBuf, VmmError> {
+    crate::scratch::check_self_update()?;
     let dir = data.join(DOWNLOADS);
     let save = |e: std::io::Error| VmmError::new(ErrorCode::SaveFailed, format!("Couldn't prepare the update: {e}"));
     std::fs::create_dir_all(&dir).map_err(save)?;

@@ -14,6 +14,10 @@ What Steam's Play button runs, once Settings connects it";
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
+    if let Err(e) = vmm_engine::scratch::check() {
+        show_message("Vaexil Mod Manager won't start", &e.message);
+        std::process::exit(3);
+    }
     vmm_engine::crash::install(vmm_engine::host::data_dir(), "gui".into());
     let code = match args.first().map(String::as_str) {
         None => gui::run(),

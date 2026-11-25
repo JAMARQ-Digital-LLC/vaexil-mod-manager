@@ -186,8 +186,13 @@ foreach ($n in 1..24) {
 function LoadOrder { (Get-Content $config -Raw) -match "Smoke.Mod02" }
 
 $psi = [System.Diagnostics.ProcessStartInfo]::new((Resolve-Path $Exe))
+# Scratch: the app refuses to start unless every real place below is a
+# throwaway folder, and it makes no outside connections.
+$psi.Environment['VAEXIL_MOD_MANAGER_SCRATCH'] = '1'
+$psi.Environment['VAEXIL_MOD_MANAGER_NETWORK'] = 'offline'
 $psi.Environment['VAEXIL_MOD_MANAGER_GAME'] = $work
-$psi.Environment['VAEXIL_MOD_MANAGER_DATA'] = $data
+$psi.Environment['VAEXIL_MOD_MANAGER_DATA_DIR'] = $data
+$psi.Environment.Remove('VAEXIL_MOD_MANAGER_DATA') | Out-Null
 # An empty stand-in for Steam, so Settings' Steam's Play button can never
 # reach the real Steam's settings from a test.
 $fakeSteam = Join-Path $work 'steam'

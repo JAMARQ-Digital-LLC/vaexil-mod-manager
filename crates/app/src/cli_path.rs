@@ -122,6 +122,7 @@ pub fn on_user_path(folder: &Path) -> Result<bool, String> {
 /// Adds `folder` to (or with `add` false, takes it out of) the user's PATH.
 #[cfg(windows)]
 pub fn change_user_path(folder: &Path, add: bool) -> Result<(), String> {
+    vmm_engine::scratch::check_real_settings("your PATH").map_err(|e| e.message)?;
     let (value, kind) = registry::read()?;
     let folder = folder.display().to_string();
     let new = if add { with_folder(&value, &folder) } else { without_folder(&value, &folder) };

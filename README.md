@@ -54,7 +54,7 @@ cargo test --workspace
 cargo run -p vaexil-mod-manager
 ```
 
-Set `VAEXIL_MOD_MANAGER_GAME` to a game folder to use it instead of looking for installs, and `VAEXIL_MOD_MANAGER_DATA` to a folder to use instead of `%LOCALAPPDATA%\Vaexil Mod Manager`. The smoke tests use both with throwaway folders.
+A build from anywhere but CI or the shared checkout, and every debug build, is a dev build: it keeps its data in `%LOCALAPPDATA%\Vaexil Mod Manager Dev`, never looks for the real game, Steam or AI apps, and never updates itself (`vmm version` says which build it is). Set `VAEXIL_MOD_MANAGER_GAME` to a game folder to use it, and `VAEXIL_MOD_MANAGER_DATA_DIR` (the old `VAEXIL_MOD_MANAGER_DATA` still works) to a folder to use for the app's data. Tests and smoke tests run in scratch mode: `VAEXIL_MOD_MANAGER_SCRATCH=1` with throwaway folders in `VAEXIL_MOD_MANAGER_DATA_DIR`, `VAEXIL_MOD_MANAGER_GAME`, `VAEXIL_MOD_MANAGER_STEAM` and `VAEXIL_MOD_MANAGER_AI_APPS`. Scratch refuses to start when one is missing or inside the app's real folders, `%APPDATA%` or the real Steam, and makes no outside connections (`VAEXIL_MOD_MANAGER_NETWORK=offline` does that alone).
 
 After a release build, these check that the window repaints after minimize/restore and maximize/restore, and that real mouse clicks and keyboard focus work on the mod switches:
 

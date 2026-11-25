@@ -1,6 +1,7 @@
 # Visual smoke test for the window repainting after it is minimized and
 # restored, and after maximize/restore. Runs the app against a throwaway fake
-# HITMAN folder (VAEXIL_MOD_MANAGER_GAME), so no real game or SMF is touched.
+# HITMAN folder (VAEXIL_MOD_MANAGER_GAME) in scratch mode, so no real game,
+# SMF, data folder, Steam or AI app is touched.
 # Exits 1 if a restored window differs from the first screenshot.
 #
 #   ./scripts/smoke-minimize-restore.ps1 [-Exe target\release\vaexil-mod-manager.exe]
@@ -46,7 +47,18 @@ foreach ($n in 'One', 'Two', 'Three', 'Four') {
 New-Item -ItemType Directory -Force (Join-Path $smf 'Mods\Smoke RPKG') | Out-Null
 
 $psi = [System.Diagnostics.ProcessStartInfo]::new((Resolve-Path $Exe))
+# Scratch: the app refuses to start unless every real place is replaced by
+# a throwaway folder (the data folder, Steam and the AI apps too), and it
+# makes no outside connections.
+$psi.Environment['VAEXIL_MOD_MANAGER_SCRATCH'] = '1'
+$psi.Environment['VAEXIL_MOD_MANAGER_NETWORK'] = 'offline'
 $psi.Environment['VAEXIL_MOD_MANAGER_GAME'] = $work
+foreach ($pair in @(@('DATA_DIR', 'data'), @('STEAM', 'steam'), @('AI_APPS', 'ai-apps'))) {
+    $dir = Join-Path $work $pair[1]
+    New-Item -ItemType Directory -Force $dir | Out-Null
+    $psi.Environment['VAEXIL_MOD_MANAGER_' + $pair[0]] = $dir
+}
+$psi.Environment.Remove('VAEXIL_MOD_MANAGER_DATA') | Out-Null
 $p = [System.Diagnostics.Process]::Start($psi)
 
 # The process also owns a small helper window, which .NET's MainWindowHandle

@@ -34,8 +34,14 @@ impl Server {
     fn start(tmp: &Path) -> Server {
         let mut child = Command::new(env!("CARGO_BIN_EXE_vmm"))
             .arg("mcp")
+            // Scratch: every real place replaced, and refused if it were real.
+            .env("VAEXIL_MOD_MANAGER_SCRATCH", "1")
+            .env("VAEXIL_MOD_MANAGER_NETWORK", "offline")
             .env("VAEXIL_MOD_MANAGER_GAME", tmp.join("game"))
-            .env("VAEXIL_MOD_MANAGER_DATA", tmp.join("data"))
+            .env("VAEXIL_MOD_MANAGER_DATA_DIR", tmp.join("data"))
+            .env("VAEXIL_MOD_MANAGER_STEAM", tmp.join("steam"))
+            .env("VAEXIL_MOD_MANAGER_AI_APPS", tmp.join("ai-apps"))
+            .env_remove("VAEXIL_MOD_MANAGER_DATA")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::inherit())

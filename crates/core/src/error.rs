@@ -70,10 +70,13 @@ pub enum ErrorCode {
     SmfUpdating,
     /// An AI app isn't installed here, or can't do what was asked from here.
     AiAppUnavailable,
+    /// A scratch, test or development run refused something real: a real
+    /// folder, the real Steam or AI apps, the network, or a self-update.
+    ScratchRefused,
 }
 
 impl ErrorCode {
-    pub const ALL: [ErrorCode; 30] = [
+    pub const ALL: [ErrorCode; 31] = [
         ErrorCode::GameNotFound,
         ErrorCode::FrameworkMissing,
         ErrorCode::ConfigUnreadable,
@@ -104,6 +107,7 @@ impl ErrorCode {
         ErrorCode::SmfUpdateHeld,
         ErrorCode::SmfUpdating,
         ErrorCode::AiAppUnavailable,
+        ErrorCode::ScratchRefused,
     ];
 
     pub fn as_str(self) -> &'static str {
@@ -138,6 +142,7 @@ impl ErrorCode {
             ErrorCode::SmfUpdateHeld => "smf.update_held",
             ErrorCode::SmfUpdating => "smf.updating",
             ErrorCode::AiAppUnavailable => "ai_app.unavailable",
+            ErrorCode::ScratchRefused => "scratch.refused",
         }
     }
 
@@ -176,6 +181,7 @@ impl ErrorCode {
             ErrorCode::SmfUpdateHeld => "SMF's update can't be applied automatically.",
             ErrorCode::SmfUpdating => "SMF is being updated.",
             ErrorCode::AiAppUnavailable => "That AI app isn't installed here, or can't do this from here.",
+            ErrorCode::ScratchRefused => "A scratch or development run refused something real.",
         }
     }
 
@@ -230,6 +236,9 @@ impl ErrorCode {
             }
             ErrorCode::SmfUpdating => "Wait for the update to finish, then try again.",
             ErrorCode::AiAppUnavailable => "Install the AI app, or send it the request yourself from the app.",
+            ErrorCode::ScratchRefused => {
+                "Name throwaway folders with the VAEXIL_MOD_MANAGER_ variables, or use the installed app."
+            }
         }
     }
 

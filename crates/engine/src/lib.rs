@@ -18,6 +18,7 @@ pub mod events;
 pub mod host;
 pub mod http;
 pub mod journal;
+pub mod scratch;
 pub mod settings;
 pub mod setups;
 pub mod smf_update;
@@ -42,8 +43,10 @@ use setups::{Pass, Setups};
 /// throwaway folders.
 pub struct Engine {
     backend: Box<dyn Backend>,
-    /// `%LOCALAPPDATA%\Vaexil Mod Manager`, or `None` when Windows doesn't say
-    /// where that is; then nothing that needs a backup is allowed.
+    /// `%LOCALAPPDATA%\Vaexil Mod Manager` (a dev build's `... Dev`, or the
+    /// folder `VAEXIL_MOD_MANAGER_DATA_DIR` names), or `None` when Windows
+    /// doesn't say where that is, or scratch refuses it; then nothing that
+    /// needs a backup is allowed.
     data_dir: Option<PathBuf>,
     settings: RefCell<Result<Settings, VmmError>>,
     setups: RefCell<Result<Setups, VmmError>>,
@@ -62,7 +65,12 @@ impl Engine {
 
     /// The engine for this PC, used by `caller`. Old event logs are pruned.
     pub fn open_as(caller: Caller) -> Engine {
-        let mut engine = Engine::with_data_dir(host::data_dir());
+        let data = host::data_dir();
+        // Best effort: a folder that can't be made private is still used.
+        if let Some(dir) = &data {
+            let _ = host::prepare_data_dir(dir);
+        }
+        let mut engine = Engine::with_data_dir(data);
         engine.caller = caller;
         if let Some(dir) = engine.logs_dir() {
             events::prune(&dir, deploy::now_ms());

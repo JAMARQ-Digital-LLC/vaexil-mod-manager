@@ -94,11 +94,19 @@ pub struct Places {
 
 impl Places {
     /// `VAEXIL_MOD_MANAGER_AI_APPS`, when set, is the only folder looked
-    /// in, so tests and development runs never reach the real AI apps.
+    /// in, so tests and development runs never reach the real AI apps. A dev
+    /// build or a scratch run without it looks nowhere.
     pub fn from_env() -> Places {
         let var = |k: &str| std::env::var_os(k).filter(|v| !v.is_empty()).map(PathBuf::from);
         if let Some(only) = var("VAEXIL_MOD_MANAGER_AI_APPS") {
+            let real = crate::scratch::Real::from_env();
+            if crate::scratch::active() && crate::scratch::check_path("The AI apps folder", &only, &real).is_err() {
+                return Places::default();
+            }
             return Places { path: vec![only], ..Places::default() };
+        }
+        if !crate::scratch::real_host_allowed() {
+            return Places::default();
         }
         Places {
             path: std::env::var_os("PATH").map(|p| std::env::split_paths(&p).collect()).unwrap_or_default(),
