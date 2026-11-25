@@ -148,6 +148,27 @@ mod acl {
         }
     }
 
+    /// Whether `sid` (SDDL: `S-1-...` or an alias such as `LA`) is the
+    /// current user's.
+    #[cfg(test)]
+    pub fn is_current_user(sid: &str) -> io::Result<bool> {
+        use windows::Win32::Security::Authorization::ConvertStringSidToSidW;
+        use windows::Win32::Security::{EqualSid, PSID};
+        let mine = current_user_sid()?;
+        // SAFETY: both SIDs come from Windows and are freed with LocalFree.
+        unsafe {
+            let (mut a, mut b) = (PSID::default(), PSID::default());
+            ConvertStringSidToSidW(&HSTRING::from(sid), &mut a).map_err(os)?;
+            let r = ConvertStringSidToSidW(&HSTRING::from(mine), &mut b).map_err(os);
+            let same = r.map(|()| EqualSid(a, b).is_ok());
+            let _ = LocalFree(Some(HLOCAL(a.0)));
+            if !b.0.is_null() {
+                let _ = LocalFree(Some(HLOCAL(b.0)));
+            }
+            same
+        }
+    }
+
     pub fn get_dacl(dir: &Path) -> io::Result<String> {
         // SAFETY: Windows allocates the descriptor and the string; both are
         // freed with LocalFree.
@@ -273,12 +294,21 @@ pub fn running(names: &[&str]) -> Vec<String> {
 mod tests {
     #[test]
     fn the_data_folder_is_private_to_this_user() {
+        // One entry: allow, inherited by files and folders (OICI), full
+        // access, for this user. Windows may write the SID as an alias
+        // (LA for the built-in Administrator, as on CI), so the SIDs are
+        // compared, not the text.
+        fn private_to_me(sddl: &str) -> bool {
+            let Some(rest) = sddl.strip_prefix("D:P(A;OICI;FA;;;") else { return false };
+            let Some(sid) = rest.strip_suffix(')') else { return false };
+            !sid.contains('(') && super::acl::is_current_user(sid).unwrap()
+        }
         let tmp = tempfile::tempdir().unwrap();
         let dir = tmp.path().join("data");
         super::prepare_data_dir(&dir).unwrap();
-        let want = super::private_sddl().unwrap();
-        assert!(want.starts_with("D:P(A;OICI;FA;;;S-1-5-"), "{want}");
-        assert_eq!(super::read_dacl(&dir).unwrap(), want);
+        assert!(private_to_me(&super::private_sddl().unwrap()));
+        let got = super::read_dacl(&dir).unwrap();
+        assert!(private_to_me(&got), "{got}");
         // A file inside inherits only that entry.
         std::fs::write(dir.join("settings.json"), "{}").unwrap();
         let file = super::read_dacl(&dir.join("settings.json")).unwrap();
@@ -286,9 +316,11 @@ mod tests {
         // An existing folder with the usual inherited entries is fixed at launch.
         let other = tmp.path().join("existing");
         std::fs::create_dir(&other).unwrap();
-        assert_ne!(super::read_dacl(&other).unwrap(), want);
+        let before = super::read_dacl(&other).unwrap();
+        assert!(!private_to_me(&before), "{before}");
         super::prepare_data_dir(&other).unwrap();
-        assert_eq!(super::read_dacl(&other).unwrap(), want);
+        let after = super::read_dacl(&other).unwrap();
+        assert!(private_to_me(&after), "{after}");
     }
 
     #[test]
