@@ -44,13 +44,25 @@ jobs:
             echo "installer=$RUNNER_TEMP/VaexilModManager-${version}-setup.exe"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Mint the releases token
+        id: releases-token
+        uses: actions/create-github-app-token@v3
+        with:
+          # One-hour token from the jamarq-releases-publisher App (Contents
+          # write on jamarq-releases only; Token Plan Stage 4). app-id, not
+          # client-id: actionlint 1.7.12 (the fleet's pin) knows only app-id.
+          app-id: ${{ secrets.JAMARQ_RELEASES_APP_ID }}
+          private-key: ${{ secrets.JAMARQ_RELEASES_APP_PRIVATE_KEY }}
+          owner: JAMARQ-Digital-LLC
+          repositories: jamarq-releases
+
       - name: Publish
         uses: JAMARQ-Digital-LLC/jamarq-releases/publish@c3a65025733faf674acb5d4d9f269242052fa74f
         with:
           app: vaexil-mod-manager
           kind: plain
           version: ${{ steps.release.outputs.version }}
-          token: ${{ secrets.JAMARQ_RELEASES_TOKEN }}
+          token: ${{ steps.releases-token.outputs.token }}
           installer: ${{ steps.release.outputs.installer }}
           notes: >-
             Vaexil Mod Manager ${{ steps.release.outputs.version }}. GPL-3.0; source and
