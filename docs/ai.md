@@ -49,10 +49,10 @@ A change is one or more of these, in order: turn mods on or off, choose a mod's 
 
 ## Your control
 
-- **Off until you turn it on.** "Let AI tools make changes" in Settings is off by default. While it's off, AI tools can read and plan, but `apply_plan` is refused with `ai.changes_off`.
+- **Off until you turn it on.** "Let AI tools make changes" in Settings is off by default. While it's off, AI tools can read and plan, but `apply_plan` and `start_deploy` are refused with `ai.changes_off`.
 - **Only what you ask for.** The server tells the model to change nothing on its own initiative, and to show you a plan's steps before applying it. `apply_plan` is marked destructive, so the app asks you before it runs, and it needs your request in your own words.
 - **A record.** Every applied plan is appended to `journal.jsonl` in `%LOCALAPPDATA%\Vaexil Mod Manager`. It records who applied it (`mcp:<app name>`, or `cli`), your request, and each step.
-- **Nothing else.** The server has no tool for files, commands or the network. It can do only what the window does, and less: it can't deploy or start the game.
+- **Nothing else.** The server has no tool for files, commands or the network. It can do only what the window does, and less: it can deploy (with the Settings switch on and your request) but it can't start the game.
 
 ## For example
 

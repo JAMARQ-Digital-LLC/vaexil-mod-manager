@@ -67,7 +67,7 @@ After a release build, these check that the window repaints after minimize/resto
 
 ## Safety
 
-[docs/safety-model.md](docs/safety-model.md) lists every file the app reads. It writes none.
+[docs/safety-model.md](docs/safety-model.md) lists every file the app reads and writes.
 
 ## License
 

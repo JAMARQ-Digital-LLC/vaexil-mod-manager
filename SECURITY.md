@@ -1,9 +1,10 @@
 # Security
 
-Vaexil Mod Manager runs with your normal user rights. It never asks for admin rights, and it makes no network connections. The [safety model](docs/safety-model.md) lists every file it reads and writes. In short:
+Vaexil Mod Manager runs with your normal user rights. It never asks for admin rights. Its only network connections are to GitHub, over HTTPS, to check for and download SMF and Vaexil Mod Manager updates. The [safety model](docs/safety-model.md) lists every file it reads and writes. In short:
 
 - It never changes Simple Mod Framework's own code or the files SMF ships, and it sends nothing to SMF's authors.
-- This version writes nothing at all: not inside HITMAN's folder, not inside SMF's folder, and not even its own settings. Later versions add writes one at a time, and the safety model lists each one before it ships.
+- Inside SMF's folder it writes only `config.json` (the load order and mod options, with a backup first), sets aside a stale `cleanThumbs.dat` before a deploy, and replaces SMF's program files when you choose to update SMF. Inside HITMAN's folder it writes nothing itself; a deploy is SMF's own `Deploy.exe` at work.
+- Its own files (settings, setups, logs, plans, the change journal and backups) go in `%LOCALAPPDATA%\Vaexil Mod Manager`. Only when you confirm it does it change your PATH, HITMAN's launch options in Steam, or an AI app's MCP settings. Every new write is listed in the safety model before it ships.
 
 ## Reporting a problem
 
