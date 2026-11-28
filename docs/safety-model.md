@@ -11,7 +11,7 @@ Vaexil Mod Manager's promise is that Simple Mod Framework stays exactly as its a
 | `%ProgramData%\Epic\EpicGamesLauncher\Data\Manifests\*.item` | Find an Epic Games install of HITMAN. |
 | `X:\XboxGames\*\Content\MicrosoftGame.Config` (existence only) | Find a Microsoft Store install of HITMAN. |
 | The game's `Retail\HITMAN3.exe` or `Retail\Runtime\chunk0.rpkg` (existence only) | Confirm the folder is HITMAN, the same check SMF's own Mod Manager makes. |
-| SMF's `Deploy.exe` (read in full, never run) | Its SHA-256 identifies the installed SMF release. It is read again only when its size or modified time changes. |
+| SMF's `Deploy.exe` (read in full to identify the release; run only for a deploy, see Processes) | Its SHA-256 identifies the installed SMF release. It is read again only when its size or modified time changes. |
 | SMF's `Mods` folder and each mod's `manifest.json` | The mod list: name, id, version, authors, options and load rules (`loadBefore`/`loadAfter`, including those of chosen options). File names inside each mod (never their contents) show what kind of mod it is, for grouping, and which hash-named game files it replaces, for the "replaced by" warnings. |
 
 Enforcement:
@@ -64,7 +64,7 @@ Enforcement:
 
 ## AI tools
 
-`vmm mcp` is an MCP server for AI apps (`docs/ai.md`). It speaks only over the stdin and stdout of the AI app that starts it: it opens no port and makes no network call, and the `rmcp` crate is built with its stdio transport only, so `cargo deny`'s ban on HTTP and TLS crates still holds. Its tools are the engine's own operations, with no file, command or network access. Reading is always allowed. `apply_plan`, the only tool that changes anything, is refused unless "Let AI tools make changes" is on in Settings (off by default) and the call carries the user's request, which the journal keeps. Every check and backup above applies as in the window. The MCP integration test (`crates/cli/tests/mcp.rs`) checks the refusal, the tool annotations, and that a refused plan leaves `config.json` untouched.
+`vmm mcp` is an MCP server for AI apps (`docs/ai.md`). It speaks only over the stdin and stdout of the AI app that starts it: it opens no port and makes no network call, and the `rmcp` crate is built with its stdio transport only, so `cargo deny`'s ban on HTTP and TLS crates still holds. Its tools are the engine's own operations, with no file, command or network access. Reading is always allowed. `apply_plan` and `start_deploy`, the only tools that change anything, are refused unless "Let AI tools make changes" is on in Settings (off by default) and the call carries the user's request; the journal keeps the request for each applied plan. Every check and backup above applies as in the window. The MCP integration test (`crates/cli/tests/mcp.rs`) checks the refusal, the tool annotations, and that a refused plan leaves `config.json` untouched.
 
 ## Processes
 

@@ -6,7 +6,7 @@
 - [ ] Keeps the [safety model](../docs/safety-model.md):
   - [ ] SMF's own code and shipped files are never changed, and nothing is sent to SMF's authors;
   - [ ] any new write is listed in the safety model in this pull request;
-  - [ ] no network access;
+  - [ ] no network access beyond what the safety model lists (GitHub, through WinHTTP, for update checks and downloads);
   - [ ] no admin rights.
 - [ ] Tests added or updated where the behaviour can be tested.
 - [ ] UI changes:
